@@ -1,0 +1,83 @@
+{
+  "risk_categories": [
+    {
+      "name": "Indemnity",
+      "description": "Obligation to compensate for losses or damages.",
+      "risk_level": "High",
+      "toxic_patterns": [
+        "unlimited indemnity",
+        "indemnify for any and all claims",
+        "sole negligence"
+      ],
+      "red_flags": [
+        "Broad, uncapped indemnity obligations.",
+        "Obligation to indemnify for third-party negligence.",
+        "Lack of control over the defense of a claim."
+      ],
+      "benchmark_language": "The Seller agrees to indemnify the Buyer for direct damages arising from Seller's gross negligence or willful misconduct, capped at the total contract value."
+    },
+    {
+      "name": "Termination",
+      "description": "Right to end the contract.",
+      "risk_level": "Medium",
+      "toxic_patterns": [
+        "termination for convenience without notice",
+        "immediate termination for any reason",
+        "non-refundable fees upon termination"
+      ],
+      "red_flags": [
+        "One-sided termination for convenience.",
+        "Unreasonable notice periods.",
+        "Forfeiture of paid-up fees."
+      ],
+      "benchmark_language": "Either party may terminate this agreement for convenience upon 30 days written notice. Prepaid fees for services not yet rendered shall be refunded on a pro-rata basis."
+    },
+    {
+      "name": "Governing Law",
+      "description": "The legal jurisdiction that governs the contract.",
+      "risk_level": "Medium",
+      "toxic_patterns": [
+        "exclusive jurisdiction of [unfavorable locale]",
+        "foreign law governing domestic transactions",
+        "arbitration in inconvenient locations"
+      ],
+      "red_flags": [
+        "Foreign jurisdictions with unpredictable legal systems.",
+        "Inconvenient forum selection for disputes."
+      ],
+      "benchmark_language": "This agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without regard to its conflict of law principles."
+    },
+    {
+      "name": "Limitation of Liability",
+      "description": "Caps on the amount one party has to pay the other in damages.",
+      "risk_level": "High",
+      "toxic_patterns": [
+        "no limitation of liability",
+        "aggregate liability not to exceed $0",
+        "exclusion of indirect, incidental, or consequential damages"
+      ],
+      "red_flags": [
+        "Uncapped liability for general damages.",
+        "Overly broad exclusions of consequential damages.",
+        "Extremely low caps that don't reflect risk."
+      ],
+      "benchmark_language": "Each party's maximum aggregate liability shall be limited to the total fees paid under this agreement in the 12 months preceding the claim."
+    },
+    {
+      "name": "Intellectual Property",
+      "description": "Ownership and usage rights of created work.",
+      "risk_level": "High",
+      "toxic_patterns": [
+        "transfer of all IP ownership",
+        "perpetual, irrevocable, royalty-free license to all data",
+        "work made for hire without limitations"
+      ],
+      "red_flags": [
+        "Loss of ownership of pre-existing intellectual property.",
+        "Broad usage rights for the other party without compensation.",
+        "Vague definitions of 'Deliverables'."
+      ],
+      "benchmark_language": "Seller retains ownership of all pre-existing IP. Buyer is granted a non-exclusive license to use the Deliverables solely for its internal business purposes."
+    }
+  ]
+}

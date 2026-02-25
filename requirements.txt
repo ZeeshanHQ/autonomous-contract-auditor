@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+gunicorn
+python-multipart
+langchain
+langchain-core
+langchain-google-genai
+langchain-groq
+langgraph
+PyMuPDF
+pydantic
+pydantic-settings
+python-dotenv
+markdown
+typing-extensions
