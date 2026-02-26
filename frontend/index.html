@@ -127,6 +127,78 @@
                 background-position: 200% 0;
             }
         }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+
+            .glass {
+                background: white !important;
+                border: 1px solid #e2e8f0 !important;
+                backdrop-filter: none !important;
+                color: black !important;
+                box-shadow: none !important;
+            }
+
+            #upload-panel,
+            #processing-panel,
+            footer,
+            button,
+            .hidden.md\:block,
+            header>div:last-child {
+                display: none !important;
+            }
+
+            #results-panel {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            article#report-content {
+                color: black !important;
+            }
+
+            article#report-content h1,
+            article#report-content h2,
+            article#report-content h3,
+            article#report-content strong {
+                color: black !important;
+            }
+
+            article#report-content blockquote {
+                background: #f8fafc !important;
+                border-left: 4px solid #ef4444 !important;
+                color: #1e293b !important;
+            }
+
+            article#report-content pre,
+            article#report-content code {
+                background: #f1f5f9 !important;
+                border: 1px solid #cbd5e1 !important;
+                color: black !important;
+            }
+
+            /* Override prose-invert for white backgrounds */
+            .prose-invert {
+                --tw-prose-body: #1e293b;
+                --tw-prose-headings: #0f172a;
+                --tw-prose-links: #2563eb;
+                --tw-prose-bold: #0f172a;
+                --tw-prose-pre-bg: #f1f5f9;
+            }
+
+            #score-circle {
+                stroke: #3b82f6 !important;
+            }
+
+            #score-text {
+                color: black !important;
+            }
+        }
     </style>
 </head>
 
@@ -302,11 +374,18 @@
             const eventSource = new EventSource(`/status/${job_id}`);
 
             eventSource.onmessage = (event) => {
+                console.log("SSE Update received:", event.data);
                 const data = JSON.parse(event.data);
 
                 // Update UI based on progress
-                progressBarFill.style.width = `${data.progress}%`;
-                progressMessage.innerText = data.message;
+                if (data.progress !== undefined) {
+                    progressBarFill.style.width = `${data.progress}%`;
+                }
+
+                if (data.message) {
+                    progressMessage.innerText = data.message;
+                    progressMessage.classList.add('animate-pulse'); // Keep it feeling alive
+                }
 
                 // Step indicators
                 if (data.progress >= 10) setStepActive(1);

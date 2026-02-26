@@ -56,9 +56,7 @@ async def run_audit_pipeline(job_id: str, pdf_content: bytes):
             jobs[job_id].update({"status": "FAILED", "message": "Failed to extract text from PDF"})
             return
             
-        jobs[job_id].update({"progress": 30, "message": "Agent 2: Auditing Risks against Playbook..."})
-        
-        # 2. Run LangGraph
+        # 2. Run LangGraph with streaming status updates
         graph = create_graph()
         initial_state = {
             "document_text": text,
@@ -71,13 +69,27 @@ async def run_audit_pipeline(job_id: str, pdf_content: bytes):
             "report": ""
         }
         
-        # We run the graph
-        # Note: LangGraph is synchronous in this setup, so it will block the background task thread
-        # which is fine for one worker.
-        final_state = graph.invoke(initial_state)
-        
-        jobs[job_id].update({"progress": 90, "message": "Finalizing Report..."})
-        
+        node_status_map = {
+            "extract_clauses": (25, "Agent 1: Clause Context Extracted"),
+            "audit_risks": (50, "Agent 2: Audit vs Risk Standards Complete"),
+            "critique_audit": (75, "Agent 3: Critic Quality Check Complete"),
+            "generate_report": (95, "Finalizing Multimodal Report...")
+        }
+
+        final_state = initial_state
+        # Run graph in streaming mode to update progress as each node finishes
+        for output in graph.stream(initial_state):
+            for node_name, state_update in output.items():
+                if node_name in node_status_map:
+                    progress, message = node_status_map[node_name]
+                    # If it's a loop back to audit, customize message
+                    if node_name == "audit_risks" and final_state.get("loop_count", 0) > 0:
+                        message = f"Agent 2: Re-Auditing (Loop {final_state['loop_count'] + 1})..."
+                    
+                    jobs[job_id].update({"progress": progress, "message": message})
+                    # Update local state so we have the latest for the final report
+                    final_state.update(state_update)
+
         jobs[job_id].update({
             "status": "COMPLETED",
             "progress": 100,
@@ -97,25 +109,36 @@ async def get_status(job_id: str):
     if job_id not in jobs:
         raise HTTPException(status_code=404, detail="Job not found")
         
-    def event_stream():
+    async def event_stream():
         last_progress = -1
+        last_message = ""
         while True:
             job = jobs.get(job_id)
             if not job:
                 break
                 
             # Only send if something changed or it's finished
-            if job["progress"] != last_progress or job["status"] in ["COMPLETED", "FAILED"]:
+            # CRITICAL FIX: Also check for message changes to keep user engaged
+            if job["progress"] != last_progress or job["message"] != last_message or job["status"] in ["COMPLETED", "FAILED"]:
                 yield f"data: {json.dumps(job)}\n\n"
+                print(f"SSE [{job_id}]: {job['message']} ({job['progress']}%)")
                 last_progress = job["progress"]
+                last_message = job["message"]
                 
             if job["status"] in ["COMPLETED", "FAILED"]:
                 break
                 
-            import time
-            time.sleep(1) # Poll memory state every second
+            await asyncio.sleep(0.5) # Poll faster for a more "live" feel
             
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_stream(), 
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 # Serve static frontend
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
